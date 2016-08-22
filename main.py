@@ -15,11 +15,82 @@
 # limitations under the License.
 #
 import webapp2
+import cgi
+from caesar import encrypt
 
-class MainHandler(webapp2.RequestHandler):
+page_header = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rot13</title>
+    <style type="text/css">
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>
+        <a href="/">Rot13</a>
+    </h1>
+"""
+page_footer = """
+</body>
+</html>
+"""
+
+class Index(webapp2.RequestHandler):
     def get(self):
-        self.response.write('Hello world!')
+
+        main_header = "<h2>Input text for Rot 13</h2>"
+
+        text_form = """
+        <form action="/rotate" method="post">
+            Rotate by how many characters?<br>
+            <input type="number" name="rotate_by_number" value="0"/><br><br>
+            <textarea name="submitted_text" style="height: 100px; width: 400px;"></textarea>
+            <br>
+            <input type="submit"/>
+        </form>
+        """
+
+        error = self.request.get("error")
+        error_element = "<p class='error'>" + error + "</p>" if error else ""
+
+        main_content = main_header + text_form + error_element
+        response = page_header + main_content + page_footer
+        self.response.write(response)
+
+class Rot_13(webapp2.RequestHandler):
+    def post(self):
+
+        submitted_text = self.request.get("submitted_text")
+        rotate_by_number = int(self.request.get("rotate_by_number"))
+
+        if (submitted_text == ""):
+            error = "You didn't enter anything!"
+            self.redirect("/?error=" + error)
+            return
+
+        rotated_text = encrypt(submitted_text, rotate_by_number)
+
+        main_header = "<h2>Input text for Rot 13</h2>"
+
+        text_form = """
+        <form action="/rotate" method="post">
+            Rotate by how many characters?<br>
+            <input type="number" name="rotate_by_number" value="0"/><br><br>
+            <textarea name="submitted_text" style="height: 100px; width: 400px;">""" + rotated_text + """</textarea>
+            <br>
+            <input type="submit"/>
+        </form>
+        """
+
+        main_content = main_header + text_form
+        response = page_header + main_content + page_footer
+        self.response.write(response)
 
 app = webapp2.WSGIApplication([
-    ('/', MainHandler)
+    ('/', Index),
+    ('/rotate', Rot_13)
 ], debug=True)
