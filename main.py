@@ -80,7 +80,7 @@ class Rot_13(webapp2.RequestHandler):
         <form action="/rotate" method="post">
             Rotate by how many characters?<br>
             <input type="number" name="rotate_by_number" value="0"/><br><br>
-            <textarea name="submitted_text" style="height: 100px; width: 400px;">""" + rotated_text + """</textarea>
+            <textarea name="submitted_text" style="height: 100px; width: 400px;">""" + cgi.escape(rotated_text, quote=True) + """</textarea>
             <br>
             <input type="submit"/>
         </form>
